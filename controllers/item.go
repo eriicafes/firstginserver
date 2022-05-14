@@ -50,6 +50,33 @@ func GetItem(ctx *gin.Context) {
 
 }
 
+func UpdateItem(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	// collect input
+	var input schemas.UpdateItem
+
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, item := range items {
+		if item.Id == id {
+			item.Name = input.Name
+			item.Description = input.Description
+			item.Labels = input.Labels
+			item.IsActive = input.IsActive
+
+			ctx.JSON(http.StatusOK, gin.H{"data": item})
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
+
+}
+
 func RemoveItem(ctx *gin.Context) {
 	// routes intended to match with a param do not need to check if the param exists
 	id := ctx.Param("id")
