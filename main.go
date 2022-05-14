@@ -11,6 +11,7 @@ func main() {
 
 	r.GET("/", controllers.GetAllItems)
 	r.POST("/", controllers.CreateItem)
+	r.GET("/:id", controllers.GetItem)
 
 	r.Run()
 }

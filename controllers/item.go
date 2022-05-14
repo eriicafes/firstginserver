@@ -32,3 +32,20 @@ func CreateItem(ctx *gin.Context) {
 	// return response
 	ctx.JSON(http.StatusOK, gin.H{"data": newItem})
 }
+
+func GetItem(ctx *gin.Context) {
+	if id, ok := ctx.Params.Get("id"); ok {
+
+		for _, item := range items {
+			if item.Id == id {
+				ctx.JSON(http.StatusOK, gin.H{"data": item})
+				return
+			}
+		}
+
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
+	} else {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id param"})
+	}
+
+}
