@@ -49,3 +49,21 @@ func GetItem(ctx *gin.Context) {
 	}
 
 }
+
+func RemoveItem(ctx *gin.Context) {
+	// routes intended to match with a param do not need to check if the param exists
+	id := ctx.Param("id")
+
+	for index, item := range items {
+		if item.Id == id {
+			// take all elements up to the item's index (this is not inclusive of the item)
+			// merge with all elements after the item's index
+			items = append(items[:index], items[index+1:]...)
+			ctx.JSON(http.StatusOK, gin.H{"data": "item removed"})
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
+
+}
