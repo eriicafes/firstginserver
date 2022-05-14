@@ -1,10 +1,8 @@
 package models
 
 import (
-	"crypto/md5"
+	"crypto/rand"
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/eriicafes/fisrtginserver/schemas"
 )
@@ -18,12 +16,11 @@ type Item struct {
 }
 
 func generateId() string {
-	time := strconv.FormatInt(time.Now().Unix(), 10)
+	bytes := make([]byte, 16)
 
-	c := md5.New()
-	c.Write([]byte(time))
+	rand.Read(bytes)
 
-	return fmt.Sprintf("%x", c.Sum(nil))
+	return fmt.Sprintf("%x", bytes)
 }
 
 func NewItem(input schemas.CreateItem) *Item {
