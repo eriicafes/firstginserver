@@ -17,17 +17,20 @@ func GetAllItems(ctx *gin.Context) {
 
 func CreateItem(ctx *gin.Context) {
 	// validate input
-	if input, ok := utils.Validate(ctx, schemas.CreateItem{}); ok {
+	input, ok := utils.Validate(ctx, schemas.CreateItem{})
 
-		// create item
-		newItem := models.NewItem(input)
-
-		// save item
-		items = append(items, newItem)
-
-		// return response
-		ctx.JSON(http.StatusOK, gin.H{"data": newItem})
+	if !ok {
+		return
 	}
+
+	// create item
+	newItem := models.NewItem(input)
+
+	// save item
+	items = append(items, newItem)
+
+	// return response
+	ctx.JSON(http.StatusOK, gin.H{"data": newItem})
 }
 
 func GetItem(ctx *gin.Context) {
@@ -50,22 +53,25 @@ func UpdateItem(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	// validate input
-	if input, ok := utils.Validate(ctx, schemas.UpdateItem{}); ok {
+	input, ok := utils.Validate(ctx, schemas.UpdateItem{})
 
-		for _, item := range items {
-			if item.Id == id {
-				item.Name = input.Name
-				item.Description = input.Description
-				item.Labels = input.Labels
-				item.IsActive = input.IsActive
-
-				ctx.JSON(http.StatusOK, gin.H{"data": item})
-				return
-			}
-		}
-
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
+	if !ok {
+		return
 	}
+
+	for _, item := range items {
+		if item.Id == id {
+			item.Name = input.Name
+			item.Description = input.Description
+			item.Labels = input.Labels
+			item.IsActive = input.IsActive
+
+			ctx.JSON(http.StatusOK, gin.H{"data": item})
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
 }
 
 func RemoveItem(ctx *gin.Context) {
