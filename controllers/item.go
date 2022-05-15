@@ -5,6 +5,7 @@ import (
 
 	"github.com/eriicafes/fisrtginserver/models"
 	"github.com/eriicafes/fisrtginserver/schemas"
+	"github.com/eriicafes/fisrtginserver/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,22 +16,18 @@ func GetAllItems(ctx *gin.Context) {
 }
 
 func CreateItem(ctx *gin.Context) {
-	// collect input
-	var input schemas.CreateItem
+	// validate input
+	if input, ok := utils.Validate(ctx, schemas.CreateItem{}); ok {
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		// create item
+		newItem := models.NewItem(input)
+
+		// save item
+		items = append(items, newItem)
+
+		// return response
+		ctx.JSON(http.StatusOK, gin.H{"data": newItem})
 	}
-
-	// create item
-	newItem := models.NewItem(input)
-
-	// save item
-	items = append(items, newItem)
-
-	// return response
-	ctx.JSON(http.StatusOK, gin.H{"data": newItem})
 }
 
 func GetItem(ctx *gin.Context) {
@@ -47,34 +44,28 @@ func GetItem(ctx *gin.Context) {
 	} else {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id param"})
 	}
-
 }
 
 func UpdateItem(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	// collect input
-	var input schemas.UpdateItem
+	// validate input
+	if input, ok := utils.Validate(ctx, schemas.UpdateItem{}); ok {
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+		for _, item := range items {
+			if item.Id == id {
+				item.Name = input.Name
+				item.Description = input.Description
+				item.Labels = input.Labels
+				item.IsActive = input.IsActive
 
-	for _, item := range items {
-		if item.Id == id {
-			item.Name = input.Name
-			item.Description = input.Description
-			item.Labels = input.Labels
-			item.IsActive = input.IsActive
-
-			ctx.JSON(http.StatusOK, gin.H{"data": item})
-			return
+				ctx.JSON(http.StatusOK, gin.H{"data": item})
+				return
+			}
 		}
+
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
 	}
-
-	ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
-
 }
 
 func RemoveItem(ctx *gin.Context) {
@@ -92,5 +83,4 @@ func RemoveItem(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
-
 }
